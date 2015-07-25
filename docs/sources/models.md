@@ -7,7 +7,7 @@ model = keras.models.Sequential()
 ```
 - __Methods__:
     - __add__(layer): Add a layer to the model.
-    - __compile__(optimizer, loss, class_mode="categorical"):
+    - __compile__(optimizer, loss, class_mode="categorical", theano_mode=None):
         - __Arguments__:
             - __optimizer__: str (name of optimizer) or optimizer object. See [optimizers](optimizers.md).
             - __loss__: str (name of objective function) or objective function. See [objectives](objectives.md).
@@ -28,7 +28,7 @@ model = keras.models.Sequential()
             - __show_accuracy__: boolean. Whether to display class accuracy in the logs to stdout at each epoch.
             - __class_weight__: dictionary mapping classes to a weight value, used for scaling the loss function (during training only).
             - __sample_weight__: list or numpy array with 1:1 mapping to the training samples, used for scaling the loss function (during training only).
-    - __evaluate__(X, y, batch_size=128, show_accuracy=False, verbose=1): Show performance of the model over some validation data.
+    - __evaluate__(X, y, batch_size=128, show_accuracy=False, verbose=1, sample_weight=None): Show performance of the model over some validation data.
         - __Return__: The loss score over the data, or a `(loss, accuracy)` tuple if `show_accuracy=True`.
         - __Arguments__: Same meaning as fit method above. verbose is used as a binary flag (progress bar or nothing).
     - __predict__(X, batch_size=128, verbose=1):
@@ -37,9 +37,9 @@ model = keras.models.Sequential()
     - __predict_classes__(X, batch_size=128, verbose=1): Return an array of class predictions for some test data.
         - __Return__: An array of labels for some test data.
         - __Arguments__: Same meaning as fit method above. verbose is used as a binary flag (progress bar or nothing).
-    - __train_on_batch__(X, y, accuracy=False): Single gradient update on one batch.
+    - __train_on_batch__(X, y, accuracy=False, class_weight=None, sample_weight=None): Single gradient update on one batch.
         - __Return__: loss over the data, or tuple `(loss, accuracy)` if `accuracy=True`.
-    - __test_on_batch__(X, y, accuracy=False): Single performance evaluation on one batch.
+    - __test_on_batch__(X, y, accuracy=False, sample_weight=None): Single performance evaluation on one batch.
         - __Return__: loss over the data, or tuple `(loss, accuracy)` if `accuracy=True`.
     - __save_weights__(fname, overwrite=False): Store the weights of all layers to a HDF5 file. If overwrite==False and the file already exists, an exception will be thrown.
     - __load_weights__(fname): Sets the weights of a model, based to weights stored by __save_weights__. You can only __load_weights__ on a savefile from a model with an identical architecture. __load_weights__ can be called either before or after the __compile__ step.
@@ -142,11 +142,12 @@ model = keras.models.Graph()
             - __input__: str name of the node/input that the node is connected to. Only specify *one* of either `input` or `inputs`.
             - __inputs__: list of str names of the node that the node is connected to.
             - __merge_mode__: "sum" or "concat". Only applicable if `inputs` list is specified. Merge mode for the different inputs.
-    - __compile__(optimizer, loss):
+    - __compile__(optimizer, loss, theano_mode=None):
         - __Arguments__:
             - __optimizer__: str (name of optimizer) or optimizer object. See [optimizers](optimizers.md).
             - __loss__: dictionary mapping the name(s) of the output(s) to a loss function (string name of objective function or objective function. See [objectives](objectives.md)).
-    - __fit__(data, batch_size=128, nb_epoch=100, verbose=1, validation_split=0., validation_data=None, shuffle=True, callbacks=[]): Train a model for a fixed number of epochs.
+            - __theano_mode__: A `theano.compile.mode.Mode` ([reference](http://deeplearning.net/software/theano/library/compile/mode.html)) instance controlling specifying compilation options.
+    - __fit__(data, batch_size=128, nb_epoch=100, verbose=1, validation_split=0., validation_data=None, shuffle=True, callbacks=[], class_weight={}, sample_weight={}): Train a model for a fixed number of epochs.
         - __Return__: a history dictionary with a record of training loss values at successive epochs, as well as validation loss values (if applicable).
         - __Arguments__:
             - __data__:dictionary mapping input names out outputs names to appropriate numpy arrays. All arrays should contain the same number of samples.
@@ -157,15 +158,17 @@ model = keras.models.Graph()
             - __validation_split__: float (0. < x < 1). Fraction of the data to use as held-out validation data.
             - __validation_data__: tuple (X, y) to be used as held-out validation data. Will override validation_split.
             - __shuffle__: boolean. Whether to shuffle the samples at each epoch.
-    - __evaluate__(data, batch_size=128, verbose=1): Show performance of the model over some validation data.
+            - __class_weight__: dictionary mapping classes to a weight value, used for scaling the loss function (during training only).
+            - __sample_weight__: dictionary mapping the names(s) of the output(s) to weight vectors used for scaling the loss function(s) (during training only).
+    - __evaluate__(data, batch_size=128, verbose=1, sample_weight={}): Show performance of the model over some validation data.
         - __Return__: The loss score over the data.
         - __Arguments__: Same meaning as fit method above. verbose is used as a binary flag (progress bar or nothing).
     - __predict__(data, batch_size=128, verbose=1):
         - __Return__: A dictionary mapping output names to arrays of predictions over the data.
         - __Arguments__: Same meaning as fit method above. Only inputs need to be specified in `data`.
-    - __train_on_batch__(data): Single gradient update on one batch.
+    - __train_on_batch__(data, class_weight={}, sample_weight={}): Single gradient update on one batch.
         - __Return__: loss over the data.
-    - __test_on_batch__(data): Single performance evaluation on one batch.
+    - __test_on_batch__(data, sample_weight={}): Single performance evaluation on one batch.
         - __Return__: loss over the data.
     - __save_weights__(fname, overwrite=False): Store the weights of all layers to a HDF5 file. If `overwrite==False` and the file already exists, an exception will be thrown.
     - __load_weights__(fname): Sets the weights of a model, based to weights stored by __save_weights__. You can only __load_weights__ on a savefile from a model with an identical architecture. __load_weights__ can be called either before or after the __compile__ step.
